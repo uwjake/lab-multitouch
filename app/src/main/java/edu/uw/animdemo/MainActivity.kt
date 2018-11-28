@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         when (action) {
             MotionEvent.ACTION_DOWN //put finger down
             -> {
-                //Log.v(TAG, "finger down");
+                Log.v(TAG, "finger down");
 
                 val xAnim = ObjectAnimator.ofFloat(view!!.ball, "x", x)
                 xAnim.duration = 1000
@@ -62,18 +62,35 @@ class MainActivity : AppCompatActivity() {
                 //                view.ball.cy = y;
                 //                view.ball.dx = (x - view.ball.cx)/Math.abs(x - view.ball.cx)*30;
                 //                view.ball.dy = (y - view.ball.cy)/Math.abs(y - view.ball.cy)*30;
+                var pointerIndex = MotionEventCompat.getActionIndex(event)
+                Log.v(TAG, "The pointer index is " + pointerIndex)
+                Log.v(TAG, "The pointer id is " + MotionEventCompat.getPointerId(event, pointerIndex))
                 return true
             }
             MotionEvent.ACTION_MOVE //move finger
-            ->
-                //Log.v(TAG, "finger move");
-                //                view.ball.cx = x;
-                //                view.ball.cy = y;
+            -> {
+                Log.v(TAG, "finger move");
+//                                view.ball.cx = x;
+//                                view.ball.cy = y;
                 return true
+            }
             MotionEvent.ACTION_UP //lift finger up
                 , MotionEvent.ACTION_CANCEL //aborted gesture
                 , MotionEvent.ACTION_OUTSIDE //outside bounds
             -> return super.onTouchEvent(event)
+            MotionEvent.ACTION_POINTER_DOWN
+            -> {
+                Log.v(TAG, "subsequent fingers down");
+                var pointerIndex = MotionEventCompat.getActionIndex(event)
+                Log.v(TAG, "The subsequent pointer index is " + pointerIndex)
+                Log.v(TAG, "The subsequent pointer id is " + MotionEventCompat.getPointerId(event, pointerIndex))
+                return true
+            }
+            MotionEvent.ACTION_POINTER_UP
+            -> {
+                Log.v(TAG, "subsequent fingers up");
+                return true
+            }
             else -> return super.onTouchEvent(event)
         }
     }
