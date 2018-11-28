@@ -14,6 +14,24 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.MotionEvent
+import android.R.attr.y
+import android.R.attr.x
+import android.support.v4.view.MotionEventCompat.getPointerId
+import android.support.v4.view.MotionEventCompat.getActionIndex
+import android.support.v4.view.MotionEventCompat.getPointerId
+import android.support.v4.view.MotionEventCompat.getPointerCount
+import android.support.v4.view.MotionEventCompat.getPointerId
+import android.support.v4.view.MotionEventCompat.getActionIndex
+import android.support.v4.view.MotionEventCompat.getPointerId
+import android.support.v4.view.MotionEventCompat.getActionIndex
+
+
+
+
+
+
+
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -47,48 +65,73 @@ class MainActivity : AppCompatActivity() {
         when (action) {
             MotionEvent.ACTION_DOWN //put finger down
             -> {
-                Log.v(TAG, "finger down");
+//                Log.v(TAG, "finger down");
+//
+//                val xAnim = ObjectAnimator.ofFloat(view!!.ball, "x", x)
+//                xAnim.duration = 1000
+//                val yAnim = ObjectAnimator.ofFloat(view!!.ball, "y", y)
+//                yAnim.duration = 1500 //y moves 1.5x slower
+//
+//                val set = AnimatorSet()
+//                set.playTogether(yAnim, xAnim)
+//                set.start()
+//
+//                //                view.ball.cx = x;
+//                //                view.ball.cy = y;
+//                //                view.ball.dx = (x - view.ball.cx)/Math.abs(x - view.ball.cx)*30;
+//                //                view.ball.dy = (y - view.ball.cy)/Math.abs(y - view.ball.cy)*30;
+//                var pointerIndex = MotionEventCompat.getActionIndex(event)
+//                Log.v(TAG, "The pointer index is " + pointerIndex)
+//                Log.v(TAG, "The pointer id is " + MotionEventCompat.getPointerId(event, pointerIndex))
+//                return true
 
-                val xAnim = ObjectAnimator.ofFloat(view!!.ball, "x", x)
-                xAnim.duration = 1000
-                val yAnim = ObjectAnimator.ofFloat(view!!.ball, "y", y)
-                yAnim.duration = 1500 //y moves 1.5x slower
-
-                val set = AnimatorSet()
-                set.playTogether(yAnim, xAnim)
-                set.start()
-
-                //                view.ball.cx = x;
-                //                view.ball.cy = y;
-                //                view.ball.dx = (x - view.ball.cx)/Math.abs(x - view.ball.cx)*30;
-                //                view.ball.dy = (y - view.ball.cy)/Math.abs(y - view.ball.cy)*30;
-                var pointerIndex = MotionEventCompat.getActionIndex(event)
-                Log.v(TAG, "The pointer index is " + pointerIndex)
-                Log.v(TAG, "The pointer id is " + MotionEventCompat.getPointerId(event, pointerIndex))
+                val pointerIndex = event.actionIndex
+                val pointerId = event.getPointerId(pointerIndex)
+                Log.v(TAG, "current index $pointerIndex")
+                view!!.ball.cx = x
+                view!!.ball.cy = y
+                view!!.addTouch(pointerId, x, y)
                 return true
             }
             MotionEvent.ACTION_MOVE //move finger
             -> {
                 Log.v(TAG, "finger move");
-//                                view.ball.cx = x;
-//                                view.ball.cy = y;
+                view!!.ball.cx = x;
+                view!!.ball.cy = y;
+                val count = event.pointerCount
+                for (i in 0 until count) {
+                    val id = event.getPointerId(i)
+                    val currX = event.getX(id)
+                    val currY = event.getY(id) - supportActionBar!!.height
+                    view!!.moveTouch(id, currX, currY)
+                }
                 return true
             }
-            MotionEvent.ACTION_UP //lift finger up
-                , MotionEvent.ACTION_CANCEL //aborted gesture
-                , MotionEvent.ACTION_OUTSIDE //outside bounds
+            MotionEvent.ACTION_UP -> {
+                val pointerIndex = event.actionIndex
+                val pointerId = event.getPointerId(pointerIndex)
+                view!!.removeTouch(pointerId)
+                return true
+            } //lift finger up
+            MotionEvent.ACTION_CANCEL //aborted gesture
+            , MotionEvent.ACTION_OUTSIDE //outside bounds
             -> return super.onTouchEvent(event)
             MotionEvent.ACTION_POINTER_DOWN
             -> {
                 Log.v(TAG, "subsequent fingers down");
-                var pointerIndex = MotionEventCompat.getActionIndex(event)
-                Log.v(TAG, "The subsequent pointer index is " + pointerIndex)
-                Log.v(TAG, "The subsequent pointer id is " + MotionEventCompat.getPointerId(event, pointerIndex))
+                val pointerIndex = MotionEventCompat.getActionIndex(event)
+//                Log.v(TAG, "The subsequent pointer index is " + pointerIndex)
+//                Log.v(TAG, "The subsequent pointer id is " + MotionEventCompat.getPointerId(event, pointerIndex))
+                val pointerId = MotionEventCompat.getPointerId(event, pointerIndex)
+                view!!.addTouch(pointerId, event.getX(pointerIndex), event.getY(pointerIndex) - supportActionBar!!.height)
+
                 return true
             }
             MotionEvent.ACTION_POINTER_UP
             -> {
-                Log.v(TAG, "subsequent fingers up");
+                val pointerIndex = event.actionIndex
+                val pointerId = event.getPointerId(pointerIndex)
+                view!!.removeTouch(pointerId)
                 return true
             }
             else -> return super.onTouchEvent(event)
@@ -104,7 +147,6 @@ class MainActivity : AppCompatActivity() {
         override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
 
             val scaleFactor = .03f
-
             //fling!
             Log.v(TAG, "Fling! $velocityX, $velocityY")
             view!!.ball.dx = -1f * velocityX * scaleFactor
@@ -114,9 +156,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     /** Menus  */
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.menu, menu)
@@ -124,7 +164,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
         when (item.itemId) {
             R.id.menu_pulse -> {
                 //make the ball change size!
