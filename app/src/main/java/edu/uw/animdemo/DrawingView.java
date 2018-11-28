@@ -8,6 +8,8 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 
+import java.util.HashMap;
+
 /**
  * A basic custom view for drawing on.
  * @author Joel Ross
@@ -21,10 +23,21 @@ public class DrawingView extends View {
 
     private Bitmap bmp; //image to draw on
 
+    private HashMap<Integer, Ball> touches;
+
+    public synchronized void addTouch(Integer pointerId, Float x, Float y) {
+        touches.put(pointerId, new Ball(x, y, 100));
+    }
+
+    public synchronized void removeTouch(Integer pointerId) {
+        touches.remove(pointerId);
+    }
+
     //drawing values
     private Paint whitePaint; //drawing variables (pre-defined for speed)
 
     public Ball ball; //public for easy access
+
 
     /**
      * We need to override all the constructors, since we don't know which will be called
@@ -47,6 +60,7 @@ public class DrawingView extends View {
         whitePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         whitePaint.setColor(Color.WHITE);
 
+        touches = new HashMap<>();
     }
 
     /**
